@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NYC Death Certificate Training — Resident Practice Cases</title>
+<style>
+  :root{
+    --navy:#1b2a4a; --navy2:#243a63; --teal:#0e7c86; --teal-light:#e6f4f5;
+    --paper:#fdfcf7; --ink:#22242a; --line:#c9c4b4;
+    --ok:#1e7e34; --ok-bg:#e8f5ec; --warn:#9a6700; --warn-bg:#fff8e1;
+    --err:#b02a37; --err-bg:#fdecee; --info:#0b5ed7; --info-bg:#e7f1ff;
+    --gray:#6b7280; --bg:#eef1f6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:Georgia, 'Times New Roman', serif;background:var(--bg);color:var(--ink);line-height:1.55;}
+  .sans{font-family:'Segoe UI', Helvetica, Arial, sans-serif;}
+  header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:28px 20px 22px;text-align:center;}
+  header h1{margin:0 0 6px;font-size:1.65rem;letter-spacing:.02em;}
+  header p{margin:0 auto;max-width:760px;font-size:.95rem;color:#cdd6e8;font-family:'Segoe UI',Helvetica,Arial,sans-serif;}
+  .badge-row{margin-top:10px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:.78rem;color:#9fb0d0;}
+  main{max-width:960px;margin:0 auto;padding:18px 14px 60px;}
+
+  /* Reference panel */
+  details.ref{background:#fff;border:1px solid #d8dce5;border-radius:10px;margin:16px 0;overflow:hidden;}
+  details.ref>summary{cursor:pointer;padding:14px 18px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-weight:600;color:var(--navy);background:var(--teal-light);list-style:none;}
+  details.ref>summary::before{content:'▸ ';}
+  details.ref[open]>summary::before{content:'▾ ';}
+  .ref-body{padding:16px 22px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:.92rem;}
+  .ref-body h4{margin:14px 0 6px;color:var(--teal);}
+  .ref-body ul{margin:6px 0 10px;padding-left:20px;}
+  .ref-body li{margin:4px 0;}
+  .kbd{background:#f1f3f5;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-family:monospace;font-size:.85em;}
+
+  /* Case navigation */
+  .casenav{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;}
+  .casenav button{border:1px solid #c6ccd8;background:#fff;border-radius:20px;padding:7px 14px;font-size:.85rem;cursor:pointer;color:var(--navy);transition:all .15s;}
+  .casenav button:hover{border-color:var(--teal);}
+  .casenav button.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .casenav button.done-good{box-shadow:inset 0 -3px 0 var(--ok);}
+  .casenav button.done-bad{box-shadow:inset 0 -3px 0 var(--warn);}
+
+  /* Case card */
+  .case-card{background:#fff;border:1px solid #d8dce5;border-radius:10px;padding:0;margin-top:10px;overflow:hidden;}
+  .case-head{background:var(--navy);color:#fff;padding:12px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
+  .case-head h2{margin:0;font-size:1.05rem;font-weight:600;}
+  .case-head .tag{font-size:.72rem;background:var(--teal);padding:3px 10px;border-radius:12px;letter-spacing:.04em;text-transform:uppercase;}
+  .vignette{padding:18px 22px;background:#f7f9fc;border-bottom:1px solid #e4e8ef;font-size:1.0rem;}
+  .vignette .vtitle{font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.08em;color:var(--teal);text-transform:uppercase;margin-bottom:6px;}
+
+  /* Certificate form styling */
+  .cert{margin:20px 18px;border:2px solid var(--ink);background:var(--paper);}
+  .cert-title{border-bottom:2px solid var(--ink);padding:10px 14px;text-align:center;}
+  .cert-title .l1{font-size:.78rem;letter-spacing:.14em;font-weight:700;}
+  .cert-title .l2{font-size:.68rem;letter-spacing:.06em;color:#444;margin-top:2px;}
+  .cert-sec{border-bottom:1px solid var(--ink);padding:10px 14px;}
+  .cert-sec:last-child{border-bottom:none;}
+  .cert-label{font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.03em;margin-bottom:6px;color:#333;}
+  .cert-label .sub{font-weight:400;color:#555;text-transform:none;letter-spacing:0;}
+  .cod-grid{display:grid;grid-template-columns:26px 1fr 170px;gap:6px 10px;align-items:center;}
+  .cod-grid .hdr{font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:.66rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.05em;}
+  .cod-grid .ltr{font-weight:700;font-size:.9rem;text-align:center;}
+  .cert input[type=text]{width:100%;border:none;border-bottom:1.5px solid #8a8570;background:transparent;padding:6px 4px 3px;font-family:'Courier New',monospace;font-size:.92rem;color:#1a1a2e;}
+  .cert input[type=text]:focus{outline:none;border-bottom-color:var(--teal);background:#f2fbfc;}
+  .dueto{grid-column:2/4;font-size:.7rem;color:#777;font-style:italic;padding-left:4px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;}
+  .radio-row{display:flex;flex-wrap:wrap;gap:4px 16px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:.85rem;}
+  .radio-row label{display:flex;align-items:center;gap:5px;cursor:pointer;padding:3px 4px;}
+  .radio-row input{accent-color:var(--teal);}
+  .fieldnote{font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:.72rem;color:#777;margin-top:4px;font-style:italic;}
+
+  /* line feedback */
+  .lfb{grid-column:1/4;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:.82rem;border-radius:6px;padding:7px 10px;margin:2px 0 4px;display:none;}
+  .lfb.show{display:block;}
+  .fb-ok{background:var(--ok-bg);color:var(--ok);border:1px solid #bfdec8;}
+  .fb-warn{background:var(--warn-bg);color:var(--warn);border:1px solid #e8d9a0;}
+  .fb-err{background:var(--err-bg);color:var(--err);border:1px solid #efc0c6;}
+  .fb-info{background:var(--info-bg);color:var(--info);border:1px solid #bcd4f5;}
+  .block-fb{font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:.82rem;border-radius:6px;padding:7px 10px;margin-top:8px;display:none;}
+  .block-fb.show{display:block;}
+
+  /* buttons */
+  .btn-row{padding:6px 20px 20px;display:flex;gap:12px;flex-wrap:wrap;font-family:'Segoe UI',Helvetica,Arial,sans-serif;}
+  .btn{border:none;border-radius:8px;padding:11px 22px;font-size:.92rem;font-weight:600;cursor:pointer;transition:transform .1s;}
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--teal);color:#fff;}
+  .btn-primary:hover{background:#0a656e;}
+  .btn-secondary{background:#fff;color:var(--navy);border:1.5px solid var(--navy);}
+  .btn-secondary:hover{background:#f0f3fa;}
+  .btn-ghost{background:transparent;color:var(--gray);border:1px solid #ccc;}
+
+  /* results */
+  .results{margin:0 18px 20px;display:none;font-family:'Segoe UI',Helvetica,Arial,sans-serif;}
+  .results.show{display:block;}
+  .scorebar{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #d8dce5;border-radius:10px;padding:14px 18px;margin-bottom:12px;}
+  .score-num{font-size:1.9rem;font-weight:700;}
+  .score-good{color:var(--ok);} .score-mid{color:var(--warn);} .score-poor{color:var(--err);}
+  .issues{background:#fff;border:1px solid #d8dce5;border-radius:10px;padding:14px 18px;margin-bottom:12px;}
+  .issues h3{margin:0 0 8px;font-size:.95rem;color:var(--navy);}
+  .issue{padding:8px 12px;border-radius:6px;margin:6px 0;font-size:.87rem;}
+
+  /* model answer */
+  .model{background:#fff;border:1px solid #d8dce5;border-radius:10px;padding:16px 18px;margin-bottom:12px;}
+  .model h3{margin:0 0 10px;font-size:.95rem;color:var(--navy);font-family:'Segoe UI',Helvetica,Arial,sans-serif;}
+  .model-cert{border:1.5px solid var(--ink);background:var(--paper);padding:12px 16px;font-size:.92rem;}
+  .model-cert table{width:100%;border-collapse:collapse;}
+  .model-cert td{padding:5px 8px;vertical-align:top;border-bottom:1px dotted #b5af9c;}
+  .model-cert td.ltr{width:24px;font-weight:700;}
+  .model-cert td.intv{width:190px;color:#555;font-style:italic;}
+  .model-cert .mrow-label{font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:.7rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.05em;padding-top:10px;border-bottom:none;}
+  .teach{background:var(--teal-light);border:1px solid #b8dfe2;border-radius:10px;padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:.89rem;}
+  .teach h3{margin:0 0 8px;font-size:.95rem;color:var(--teal);}
+  .teach ul{margin:0;padding-left:20px;}
+  .teach li{margin:7px 0;}
+
+  /* summary */
+  #summary{display:none;background:#fff;border:1px solid #d8dce5;border-radius:10px;padding:20px 24px;margin-top:18px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;}
+  #summary h2{color:var(--navy);margin-top:0;}
+  #summary table{width:100%;border-collapse:collapse;font-size:.9rem;}
+  #summary th,#summary td{text-align:left;padding:8px 10px;border-bottom:1px solid #e4e8ef;}
+  footer{max-width:960px;margin:0 auto;padding:0 14px 40px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:.75rem;color:var(--gray);}
+  @media (max-width:640px){ .cod-grid{grid-template-columns:20px 1fr;} .cod-grid .intv-in{grid-column:2/3;} .cod-grid .hdr-int{display:none;} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Completing the Death Certificate</h1>
+  <p>An interactive practice module for residents — cause-of-death certification in New York City (eVital).
+  Read each vignette, complete the certificate exactly as you would in eVital, then check your work for
+  targeted feedback.</p>
+  <div class="badge-row">Educational tool · Not an official NYC DOHMH or OCME product · Based on NYC DOHMH cause-of-death reporting guidance and the CDC/NCHS Physician's Handbook on Medical Certification of Death</div>
+</header>
+
+<main>
+<noscript>
+  <div style="background:#fdecee;border:2px solid #b02a37;border-radius:10px;padding:16px 20px;margin:16px 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;color:#b02a37;">
+    <b>⚠ The practice cases are not showing because this viewer does not run JavaScript.</b><br>
+    Email attachment previews block scripts. To use the module: save/download this file, then open it in a real
+    browser (Safari, Chrome, Edge, Firefox). On iPhone: tap the attachment → Share → <i>Save to Files</i> → open the
+    saved file. Everything runs locally in the browser — no internet connection is needed.
+  </div>
+</noscript>
+<details class="ref">
+  <summary>📋 Quick reference — the rules before you start (click to expand)</summary>
+  <div class="ref-body">
+    <h4>The logic of Part I</h4>
+    <ul>
+      <li><b>Line a</b> is the <b>immediate cause</b> — the final condition that resulted in death. Each line below answers <i>"…due to (or as a consequence of) what?"</i> The <b>lowest completed line is the underlying cause of death</b> — the disease that initiated the chain. One condition per line; read from bottom to top, the sequence must make etiologic and chronologic sense.</li>
+      <li><b>Never certify a mechanism as the cause.</b> "Cardiac arrest," "cardiopulmonary arrest," "asystole," "PEA," and "respiratory arrest" describe <i>how</i> every patient dies, not <i>why</i>. NYC's system will reject or flag them, and they carry no information.</li>
+      <li><b>Terminal events and treatments are not causes.</b> Intubation, pressors, CPR, comfort-care measures, and "multi-organ failure" do not belong in Part I.</li>
+      <li><b>No abbreviations.</b> Write "pulmonary embolism," not "PE"; "congestive heart failure," not "CHF."</li>
+      <li><b>Be etiologically specific</b> when the record supports it: organism for infections, site for cancers and hemorrhage, type for strokes (ischemic vs. hemorrhagic), etiology for cirrhosis and cardiomyopathy.</li>
+      <li><b>Intervals:</b> give your best approximation ("minutes," "hours," "5 days," "years"). "Unknown" is acceptable — a blank is not. Intervals should generally <i>lengthen</i> as you move down Part I.</li>
+      <li><b>Vague conditions can't stand alone as the underlying cause:</b> "renal failure," "respiratory failure," "hypotension," "sepsis" without a source, "old age," "failure to thrive." Ask yourself <i>why</i> the patient developed it and add that line.</li>
+    </ul>
+    <h4>Part II — Other significant conditions</h4>
+    <ul>
+      <li>Diseases that <b>contributed to death but are not in the causal chain</b> of Part I — e.g., COPD, diabetes, chronic kidney disease, dementia, malignancy not causing the death. Don't duplicate Part I entries here.</li>
+    </ul>
+    <h4>Manner of death & the NYC OCME</h4>
+    <ul>
+      <li>A hospital physician in NYC may certify <b>natural deaths only</b>. Any death that is <b>not 100% the result of natural disease</b> must be reported to the Office of Chief Medical Examiner (<span class="kbd">212-447-2030</span>, 24/7) before a certificate is filed.</li>
+      <li>Reportable: criminal violence; <b>any accident or injury — including falls — no matter how remote</b> (NYC has <b>no time limit</b>: a hip fracture from a fall months ago still makes the death reportable); suicide; drug or chemical overdose/poisoning; sudden death in apparent good health; deaths in custody; deaths related to employment; deaths from diagnostic or therapeutic procedures/complications; suspicious or unusual circumstances; and deaths during or within one year of pregnancy.</li>
+      <li>The "but-for" test: <i>but for</i> the injury/event, would the patient have died when they did? If not, call the OCME. The OCME may decline the case and release it back to you — document the case number and the name of the person you spoke with.</li>
+    </ul>
+    <h4>Other eVital items</h4>
+    <ul>
+      <li><b>Did tobacco use contribute to death?</b> Yes / No / Probably / Unknown — answer "Probably" or "Yes" for smoking-related deaths (COPD, lung cancer, many cardiovascular deaths).</li>
+      <li>For female decedents aged 10–54, a <b>pregnancy status</b> question must be answered; any death during or within one year of pregnancy is OCME-reportable.</li>
+      <li>eVital may show soft edit warnings highlighted in yellow; the certificate can still be filed, but fix real errors rather than overriding them.</li>
+    </ul>
+  </div>
+</details>
+
+<div class="casenav sans" id="casenav"></div>
+<div id="case-container"></div>
+<div id="summary"></div>
+</main>
+
+<footer>
+  For resident education only. Always follow current NYC DOHMH eVital instructions and your institution's decedent-affairs policies.
+  Key sources: NYC DOHMH <i>Cause of Death Reporting Instructions</i> &amp; pocket reference card; NYC OCME reportable-case criteria; CDC/NCHS <i>Physician's Handbook on Medical Certification of Death</i>.
+</footer>
+
+<script>
+/* ================= CASE DATA ================= */
+const MECHANISMS = [
+  {re:/cardi(?:o|ac)[\s-]*(?:pulmonary|respiratory)?[\s-]*arrest/i, term:'cardiac/cardiopulmonary arrest'},
+  {re:/respiratory arrest/i, term:'respiratory arrest'},
+  {re:/asystole/i, term:'asystole'},
+  {re:/pulseless/i, term:'pulseless electrical activity'},
+  {re:/\bPEA\b/, term:'PEA'},
+  {re:/electromechanical dissociation/i, term:'electromechanical dissociation'},
+  {re:/multi[\s-]*(?:system|organ)\s*(?:organ\s*)?(?:failure|dysfunction)/i, term:'multi-organ failure'},
+  {re:/\bMSOF\b|\bMOF\b|\bMODS\b/, term:'multi-organ failure (abbreviated)'},
+  {re:/old age|natural causes|failure to thrive|senescence/i, term:'"old age"-type entry'}
+];
+const ABBREV_ALLOW = new Set(['I','II','III','IV','A','B','C','D']);
+
+const CASES = [
+{
+  id:1, short:'Sepsis', title:'Case 1 — Pneumonia, Sepsis, Septic Shock', tag:'Core case',
+  vignette:`A 68-year-old man with COPD, type 2 diabetes, and a 40-pack-year smoking history is admitted with
+  cough, fever, and hypoxemia. Chest x-ray shows a right lower lobe consolidation; blood cultures grow
+  <i>Streptococcus pneumoniae</i>. Despite antibiotics he develops worsening hypotension, is intubated, and requires
+  norepinephrine and vasopressin. He becomes anuric and acidotic and dies on hospital day 5 with refractory shock.`,
+  lines:[
+    {name:'Septic shock', interval:'2 days', concepts:[/septic shock/i, /refractory (septic )?shock/i]},
+    {name:'Sepsis due to Streptococcus pneumoniae bacteremia', interval:'4 days', concepts:[/sepsis/i, /septicemia/i, /bacteremia/i]},
+    {name:'Community-acquired bacterial pneumonia (Streptococcus pneumoniae)', interval:'5 days', concepts:[/pneumonia/i]}
+  ],
+  part2:{name:'Chronic obstructive pulmonary disease; type 2 diabetes mellitus', concepts:[/chronic obstructive|copd|emphysema/i, /diabetes/i], expectSome:true},
+  manner:'Natural', ocme:'No', tobacco:['Probably','Yes'],
+  tobaccoNote:'This patient had a 40-pack-year history and died with COPD as a contributing condition — answer "Probably" (or "Yes").',
+  teaching:[
+    `The chain reads bottom-to-top: pneumonia → sepsis → septic shock. The <b>pneumonia is the underlying cause</b>, and specifying the organism (Streptococcus pneumoniae) adds real surveillance value.`,
+    `"Cardiopulmonary arrest," "intubation," "pressor-dependence," and "anuria" are mechanisms or treatments — they never belong in Part I.`,
+    `"Sepsis" alone as an underlying cause is a classic error: sepsis always comes <i>from</i> somewhere. Here the source (pneumonia) goes below it.`,
+    `COPD and diabetes contributed to susceptibility and outcome but are not links in the chain — they belong in <b>Part II</b>.`
+  ]
+},
+{
+  id:2, short:'Pulm. embolism', title:'Case 2 — Massive Pulmonary Embolism', tag:'Core case',
+  vignette:`A 72-year-old woman with metastatic colon adenocarcinoma (liver and peritoneal metastases, on
+  palliative chemotherapy) is admitted after sudden syncope. She is hypotensive and hypoxemic; CT angiography
+  shows a saddle pulmonary embolus with right-ventricular strain, and duplex shows a right femoral deep vein
+  thrombosis. Despite systemic thrombolysis she deteriorates and dies two hours after arrival.`,
+  lines:[
+    {name:'Massive (saddle) pulmonary thromboembolism', interval:'Hours', concepts:[/pulmonary (thrombo)?embol/i, /saddle embol/i]},
+    {name:'Deep vein thrombosis, right lower extremity', interval:'Days to weeks', concepts:[/deep ven|deep-vein|venous thromb/i, /femoral (vein )?thromb/i]},
+    {name:'Metastatic colon adenocarcinoma', interval:'2 years', concepts:[/colon|colorectal/i, /adenocarcinoma.*colon/i]}
+  ],
+  part2:{name:'— (none required)', concepts:[], expectSome:false},
+  manner:'Natural', ocme:'No', tobacco:['No','Unknown'],
+  tobaccoNote:'No tobacco history is given — "No" or "Unknown" is appropriate.',
+  teaching:[
+    `Do not stop at "pulmonary embolism." A PE is an intermediate event — the certificate should answer <i>why she clotted</i>. Malignancy-associated hypercoagulability makes the <b>metastatic colon cancer the underlying cause</b>.`,
+    `Write it out: "pulmonary embolism," never "PE." Abbreviations are not acceptable on a death certificate.`,
+    `Specify the cancer's site and histology ("metastatic colon adenocarcinoma"), not just "cancer" or "malignancy."`,
+    `Had this embolism followed a recent surgical procedure or an injury (e.g., immobilization after a fracture), the death would be OCME-reportable. Here the chain is purely natural disease.`
+  ]
+},
+{
+  id:3, short:'Stroke', title:'Case 3 — Ischemic Stroke', tag:'Core case',
+  vignette:`An 81-year-old man with hypertension and atrial fibrillation (anticoagulation held after a prior GI
+  bleed) presents with aphasia and right hemiplegia. Imaging confirms a large left middle-cerebral-artery
+  ischemic infarct. On day 3 he becomes progressively somnolent with imaging evidence of malignant cerebral
+  edema and midline shift. In accordance with his goals of care, he transitions to comfort measures and dies on
+  hospital day 4.`,
+  lines:[
+    {name:'Cerebral edema with transtentorial herniation', interval:'1 day', concepts:[/cerebral (o?edema|herniation)/i, /herniation/i, /midline shift/i, /malignant.*edema/i]},
+    {name:'Acute ischemic stroke, left middle cerebral artery territory', interval:'4 days', concepts:[/ischemi.*(stroke|infarct)|(stroke|infarct).*ischemi/i, /cerebral infarct/i, /middle cerebral artery/i, /\bstroke\b/i]},
+    {name:'Nonvalvular atrial fibrillation (cardioembolism)', interval:'Years', concepts:[/atrial fibrillation/i, /cardioembol/i]}
+  ],
+  part2:{name:'Hypertension; prior gastrointestinal hemorrhage precluding anticoagulation', concepts:[/hypertension/i, /gastrointestinal|gi bleed/i], expectSome:true},
+  manner:'Natural', ocme:'No', tobacco:['No','Unknown'],
+  tobaccoNote:'No tobacco history is given — "No" or "Unknown" is appropriate.',
+  teaching:[
+    `Specify the stroke type — <b>ischemic vs. hemorrhagic</b> — and, when known, the territory. "CVA" and "stroke" alone are too vague and abbreviated forms are unacceptable.`,
+    `The <b>etiology of the stroke belongs below it</b>: here, cardioembolism from atrial fibrillation. Atherosclerotic cerebrovascular disease would be the alternative underlying line if no cardiac source existed.`,
+    `Herniation/cerebral edema on line a is optional but accurately captures the terminal physiology; the certificate is acceptable with the stroke itself on line a.`,
+    `Comfort-directed care does not change the cause or manner of death — you certify the disease, not the care plan.`
+  ]
+},
+{
+  id:4, short:'Cirrhosis', title:'Case 4 — Variceal Hemorrhage and Cirrhosis', tag:'Core case',
+  vignette:`A 55-year-old man with alcohol-associated cirrhosis (known esophageal varices, prior banding,
+  MELD-Na 28) is brought in with massive hematemesis. He is hypotensive and encephalopathic; emergent
+  endoscopy shows actively bleeding esophageal varices that cannot be controlled. Despite massive transfusion
+  and pressors he dies in the ICU eight hours after admission. He drank approximately a pint of vodka daily for
+  25 years.`,
+  lines:[
+    {name:'Upper gastrointestinal hemorrhage (bleeding esophageal varices)', interval:'Hours', concepts:[/variceal|varices/i, /(upper )?gastrointestinal (hemorrhage|bleed)/i, /hematemesis/i, /hypovolemic shock|hemorrhagic shock/i]},
+    {name:'Portal hypertension', interval:'Years', concepts:[/portal hypertension/i]},
+    {name:'Alcohol-associated cirrhosis of the liver', interval:'Years', concepts:[/cirrhosis/i]},
+    {name:'Chronic alcohol use disorder', interval:'25 years', concepts:[/alcohol/i, /ethanol/i]}
+  ],
+  part2:{name:'Hepatic encephalopathy', concepts:[/encephalopathy/i, /coagulopathy/i], expectSome:false},
+  manner:'Natural', ocme:'No', tobacco:['No','Unknown'],
+  tobaccoNote:'No tobacco history is given — "No" or "Unknown" is appropriate.',
+  teaching:[
+    `This is the NYC DOHMH's own model four-line chain: variceal hemorrhage → portal hypertension → cirrhosis → chronic alcohol use. <b>Chronic alcoholism is an acceptable, natural underlying cause</b> — don't stop at "cirrhosis" when the etiology is documented.`,
+    `Death from <b>chronic</b> alcohol use is natural. Death involving <b>acute</b> intoxication or any drug/chemical overdose is OCME-reportable — the distinction matters.`,
+    `"Hypovolemic shock" as line a above the hemorrhage is also acceptable — but never leave "shock" as the lowest line.`,
+    `Specify the site of a fatal hemorrhage ("esophageal varices"), not just "GI bleed" — and never abbreviate "GI."`
+  ]
+},
+{
+  id:5, short:'Heart failure', title:'Case 5 — End-Stage Heart Failure', tag:'Core case',
+  vignette:`A 79-year-old woman with ischemic cardiomyopathy (EF 20%, myocardial infarction with stents in
+  2019) and stage 4 chronic kidney disease is admitted with her third heart-failure hospitalization this year:
+  orthopnea, anasarca, and a rising creatinine. She becomes hypotensive whenever diuresis is attempted and is
+  transitioned to inotrope-dependent comfort-focused care. She dies on hospital day 9.`,
+  lines:[
+    {name:'Acute on chronic congestive heart failure', interval:'2 weeks', concepts:[/heart failure/i, /cardiogenic shock/i, /decompensat/i]},
+    {name:'Ischemic cardiomyopathy', interval:'7 years', concepts:[/ischemic cardiomyopathy/i, /cardiomyopathy/i]},
+    {name:'Atherosclerotic coronary artery disease', interval:'Greater than 10 years', concepts:[/coronary artery disease|atherosclero/i, /myocardial infarction/i]}
+  ],
+  part2:{name:'Stage 4 chronic kidney disease', concepts:[/chronic kidney|renal (disease|insufficiency)/i, /cardiorenal/i], expectSome:true},
+  manner:'Natural', ocme:'No', tobacco:['Unknown','No','Probably'],
+  tobaccoNote:'Not stated in the vignette — "Unknown" is defensible; many coronary deaths warrant "Probably" when a smoking history exists.',
+  teaching:[
+    `"Congestive heart failure" alone as an underlying cause is incomplete — heart failure always has an etiology. Here: heart failure → ischemic cardiomyopathy → <b>atherosclerotic coronary artery disease</b> (the underlying cause).`,
+    `Write "congestive heart failure," never "CHF." Spell everything out.`,
+    `Her kidney disease worsened the terminal course but did not initiate it — <b>Part II</b>. "Renal failure" can never be an underlying cause; you can always say why the kidneys failed.`,
+    `"Cardiac arrest" as line a would add nothing: it is the mechanism of every death.`
+  ]
+},
+{
+  id:6, short:'Hip fracture ⚠', title:'Case 6 — Hip Fracture: Whose Case Is It?', tag:'OCME trap',
+  vignette:`An 84-year-old woman with osteoporosis and mild dementia tripped on a rug at home three weeks ago
+  and sustained a right femoral neck fracture, repaired with hemiarthroplasty. She was discharged to subacute
+  rehab, where she remained largely bedbound. She is readmitted with hypoxemia and is found to have a right
+  lower lobe pneumonia; she deteriorates despite antibiotics and dies on hospital day 3. The primary team asks
+  you to complete the death certificate as "pneumonia due to dementia."`,
+  isOcmeCase:true,
+  lines:[
+    {name:'Hypostatic pneumonia', interval:'Days', concepts:[/pneumonia/i]},
+    {name:'Immobility following repair of right femoral neck fracture', interval:'3 weeks', concepts:[/immobil|bedbound|deconditioning/i, /hemiarthroplasty|surgical repair/i, /fracture/i]},
+    {name:'Fall (tripped on rug at home)', interval:'3 weeks', concepts:[/fall|fell|tripped/i]}
+  ],
+  part2:{name:'Osteoporosis; dementia', concepts:[/osteoporosis/i, /dementia/i], expectSome:false},
+  manner:'Accident', ocme:'Yes', tobacco:['No','Unknown'],
+  tobaccoNote:'Not relevant here — the key issue is jurisdiction.',
+  teaching:[
+    `<b>This death is not certifiable by a hospital physician in NYC.</b> Apply the but-for test: but for the fall and hip fracture, she would not have been bedbound and would not have died of this pneumonia now. The chain traces back to an <b>injury</b>, so the manner is <b>Accident</b> — and only the OCME can certify a non-natural death.`,
+    `<b>There is no time limit.</b> Three weeks, three months, or three years after the fall — if the injury started the chain, the death is reportable to the OCME (212-447-2030) before any certificate is filed.`,
+    `Certifying this as "pneumonia due to dementia" — as the primary team suggested — would be a factually incorrect certificate that conceals an accidental death. This is one of the most common real-world certification errors in elderly patients.`,
+    `The OCME may investigate and certify it, or may decline and release the case with instructions. Either way, <b>call first and document</b> the case number and the name of the investigator.`
+  ]
+},
+{
+  id:7, short:'Dementia', title:'Case 7 — Aspiration Pneumonia in Advanced Dementia', tag:'Core case',
+  vignette:`An 88-year-old man with advanced Alzheimer's disease (nonverbal, bedbound for a year, on a
+  pureed diet for documented oropharyngeal dysphagia) is admitted from his nursing home with fever and
+  hypoxemia after a witnessed choking episode during a meal. Imaging shows a right-lower-lobe infiltrate
+  consistent with aspiration pneumonia. His health-care agent elects comfort-focused care consistent with his
+  MOLST, and he dies on hospital day 4.`,
+  lines:[
+    {name:'Aspiration pneumonia', interval:'4 days', concepts:[/aspiration pneumoni/i, /pneumonia/i]},
+    {name:'Oropharyngeal dysphagia', interval:'1 year', concepts:[/dysphagia/i, /swallow/i, /aspiration(?! pneumoni)/i]},
+    {name:'Advanced Alzheimer’s disease dementia', interval:'8 years', concepts:[/alzheimer/i, /dementia/i]}
+  ],
+  part2:{name:'Protein-calorie malnutrition', concepts:[/malnutrition/i, /protein.calorie/i, /deconditioning/i], expectSome:false},
+  manner:'Natural', ocme:'No', tobacco:['No','Unknown'],
+  tobaccoNote:'No tobacco history is given — "No" or "Unknown" is appropriate.',
+  teaching:[
+    `<b>Dementia is an acceptable — and nationally under-reported — underlying cause of death.</b> The chain "aspiration pneumonia → dysphagia → Alzheimer's disease" tells the true story; certifying only "aspiration pneumonia" hides it.`,
+    `"Failure to thrive" and "old age" are never acceptable causes at any line.`,
+    `A witnessed choking/aspiration event during feeding in a patient with disease-related dysphagia is generally certified as natural; if there were any question of an external cause (e.g., a foreign body obstruction, choking on non-food material, or care neglect), discuss with the OCME.`,
+    `Nursing-home deaths are not automatically ME cases in NYC, but deaths involving suspected neglect, injury, or unusual circumstances are.`
+  ]
+}
+];
+
+/* ================= STATE ================= */
+const state = { current:0, results:{} };
+
+/* ================= RENDER ================= */
+const nav = document.getElementById('casenav');
+const container = document.getElementById('case-container');
+
+function buildNav(){
+  nav.innerHTML='';
+  CASES.forEach((c,i)=>{
+    const b=document.createElement('button');
+    b.textContent=(i+1)+'. '+c.short;
+    b.id='nav-'+i;
+    b.onclick=()=>showCase(i);
+    nav.appendChild(b);
+  });
+  const s=document.createElement('button');
+  s.textContent='📊 Summary'; s.id='nav-sum'; s.onclick=showSummary;
+  nav.appendChild(s);
+}
+
+function lineInputHTML(caseIdx, li){
+  const letters=['a','b','c','d'];
+  const l=letters[li];
+  return `
+    <div class="ltr">${l}.</div>
+    <div><input type="text" id="c${caseIdx}-line${li}" autocomplete="off" spellcheck="false" aria-label="Cause line ${l}"></div>
+    <div class="intv-in"><input type="text" id="c${caseIdx}-int${li}" autocomplete="off" placeholder="interval" aria-label="Interval line ${l}"></div>
+    ${li<3?`<div class="dueto">due to (or as a consequence of):</div>`:''}
+    <div class="lfb" id="c${caseIdx}-fb${li}"></div>`;
+}
+
+function showCase(i){
+  state.current=i;
+  document.getElementById('summary').style.display='none';
+  document.querySelectorAll('.casenav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nav-'+i).classList.add('active');
+  const c=CASES[i];
+  container.innerHTML=`
+  <div class="case-card">
+    <div class="case-head"><h2>${c.title}</h2><span class="tag">${c.tag}</span></div>
+    <div class="vignette"><div class="vtitle">Clinical vignette</div>${c.vignette}</div>
+
+    <div class="cert" id="cert-${i}">
+      <div class="cert-title sans">
+        <div class="l1">CERTIFICATE OF DEATH — CONFIDENTIAL MEDICAL REPORT</div>
+        <div class="l2">City of New York · Department of Health and Mental Hygiene · Bureau of Vital Statistics (training facsimile)</div>
+      </div>
+
+      <div class="cert-sec">
+        <div class="cert-label sans">PART I. <span class="sub">Enter the chain of events — diseases, injuries, or complications — that directly caused the death. Enter the immediate cause on line a. Do NOT enter mechanisms such as cardiac arrest, respiratory arrest, or ventricular fibrillation. Do NOT abbreviate. One cause per line; not every line need be used.</span></div>
+        <div class="cod-grid">
+          <div></div><div class="hdr">Cause of death</div><div class="hdr hdr-int">Approx. interval: onset → death</div>
+          ${[0,1,2,3].map(li=>lineInputHTML(i,li)).join('')}
+        </div>
+        <div class="fieldnote sans">Line a = immediate cause. The lowest line you complete = the underlying cause of death.</div>
+      </div>
+
+      <div class="cert-sec">
+        <div class="cert-label sans">PART II. <span class="sub">Other significant conditions contributing to death but not resulting in the underlying cause in Part I. Separate multiple conditions with semicolons.</span></div>
+        <input type="text" id="c${i}-part2" autocomplete="off" spellcheck="false" aria-label="Part II conditions">
+        <div class="block-fb" id="c${i}-fbp2"></div>
+      </div>
+
+      <div class="cert-sec">
+        <div class="cert-label sans">DID TOBACCO USE CONTRIBUTE TO DEATH?</div>
+        <div class="radio-row">
+          ${['Yes','No','Probably','Unknown'].map(v=>`<label><input type="radio" name="c${i}-tob" value="${v}">${v}</label>`).join('')}
+        </div>
+        <div class="block-fb" id="c${i}-fbtob"></div>
+      </div>
+
+      <div class="cert-sec">
+        <div class="cert-label sans">MANNER OF DEATH <span class="sub">(in NYC, a hospital certifier may certify only a natural death — all others belong to the OCME)</span></div>
+        <div class="radio-row">
+          ${['Natural','Accident','Suicide','Homicide','Therapeutic Complication','Undetermined'].map(v=>`<label><input type="radio" name="c${i}-manner" value="${v}">${v}</label>`).join('')}
+        </div>
+        <div class="block-fb" id="c${i}-fbmanner"></div>
+      </div>
+
+      <div class="cert-sec">
+        <div class="cert-label sans">MUST THIS DEATH BE REPORTED TO THE OFFICE OF CHIEF MEDICAL EXAMINER BEFORE CERTIFICATION?</div>
+        <div class="radio-row">
+          <label><input type="radio" name="c${i}-ocme" value="Yes">Yes — report to OCME (212-447-2030)</label>
+          <label><input type="radio" name="c${i}-ocme" value="No">No — certifiable as a natural death</label>
+        </div>
+        <div class="block-fb" id="c${i}-fbocme"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="grade(${i})">✓ Check my certificate</button>
+      <button class="btn btn-secondary" onclick="revealModel(${i})">Show model answer</button>
+      <button class="btn btn-ghost" onclick="resetCase(${i})">Reset</button>
+      ${i<CASES.length-1?`<button class="btn btn-ghost" style="margin-left:auto" onclick="showCase(${i+1})">Next case →</button>`:`<button class="btn btn-ghost" style="margin-left:auto" onclick="showSummary()">Finish → Summary</button>`}
+    </div>
+
+    <div class="results" id="results-${i}">
+      <div class="scorebar"><div class="score-num" id="score-${i}"></div><div id="scoretext-${i}"></div></div>
+      <div class="issues" id="issues-${i}"></div>
+    </div>
+    <div class="results" id="modelwrap-${i}"></div>
+  </div>`;
+  window.scrollTo({top:0,behavior:'smooth'});
+  restoreCase(i);
+}
+
+/* ================= GRADING ================= */
+function getRadio(name){const r=document.querySelector(`input[name="${name}"]:checked`);return r?r.value:null;}
+function setFB(el, cls, html){el.className=(el.classList.contains('lfb')?'lfb':'block-fb')+' show '+cls;el.innerHTML=html;}
+function findAbbrevs(text){
+  const hits=[]; const m=text.match(/\b[A-Z]{2,6}\b/g)||[];
+  m.forEach(t=>{if(!ABBREV_ALLOW.has(t)&&!hits.includes(t))hits.push(t);});
+  return hits;
+}
+function findMechanism(text){for(const m of MECHANISMS){if(m.re.test(text))return m.term;}return null;}
+
+function grade(i){
+  const c=CASES[i];
+  let earned=0, possible=0;
+  const issues=[];
+
+  const userLines=[], userInts=[];
+  for(let li=0;li<4;li++){
+    userLines.push(document.getElementById(`c${i}-line${li}`).value.trim());
+    userInts.push(document.getElementById(`c${i}-int${li}`).value.trim());
+  }
+  const filled=userLines.map((v,idx)=>({v,idx})).filter(o=>o.v!=='');
+
+  // match user lines to expected concepts
+  const expTaken=new Array(c.lines.length).fill(-1); // expected j -> user idx
+  const userMatch=new Array(4).fill(null);           // user idx -> expected j
+  filled.forEach(o=>{
+    for(let j=0;j<c.lines.length;j++){
+      if(expTaken[j]===-1 && c.lines[j].concepts.some(re=>re.test(o.v))){
+        expTaken[j]=o.idx; userMatch[o.idx]=j; break;
+      }
+    }
+  });
+
+  // per-line feedback
+  let orderBroken=false; let lastExp=-1;
+  for(let li=0;li<4;li++){
+    const fb=document.getElementById(`c${i}-fb${li}`);
+    fb.className='lfb'; fb.innerHTML='';
+    const val=userLines[li];
+    if(val===''){
+      if(li===0){possible+=2;setFB(fb,'fb-err','Line a (the immediate cause) may not be left blank.');issues.push({cls:'fb-err',t:'Line a was left blank — every certificate needs an immediate cause.'});}
+      continue;
+    }
+    possible+=2;
+    const mech=findMechanism(val);
+    const abbrevs=findAbbrevs(val);
+    const j=userMatch[li];
+    let msgs=[];let cls='fb-ok';
+    if(mech){cls='fb-err';msgs.push(`<b>"${mech}"</b> is a mechanism/terminal event, not a cause of death — remove it and certify the disease that produced it.`);}
+    else if(j!==null){
+      if(j<lastExp){orderBroken=true;cls='fb-warn';msgs.push(`This matches "<i>${c.lines[j].name}</i>" but appears <b>out of sequence</b> — each line must be caused by the line below it.`);earned+=1;}
+      else {msgs.push(`✓ Matches the expected condition: <i>${c.lines[j].name}</i>`);earned+=2;}
+      lastExp=Math.max(lastExp,j);
+    } else {
+      cls='fb-warn';msgs.push(`This entry doesn't match a condition expected in this chain. Re-read the vignette — what documented disease does this line represent, and does the line below it explain it?`);
+    }
+    if(abbrevs.length){if(cls==='fb-ok')cls='fb-warn';msgs.push(`Avoid abbreviations (<b>${abbrevs.join(', ')}</b>) — write every term out in full.`);issues.push({cls:'fb-warn',t:`Abbreviation used on line ${'abcd'[li]} (${abbrevs.join(', ')}) — death certificates must contain no abbreviations.`});}
+    if(userInts[li]===''){msgs.push(`Add an approximate interval ("hours," "5 days," "years" — "unknown" is acceptable, blank is not).`);if(cls==='fb-ok')cls='fb-warn';}
+    setFB(fb,cls,msgs.join('<br>'));
+    if(mech)issues.push({cls:'fb-err',t:`Line ${'abcd'[li]}: "${mech}" — mechanisms of dying (arrest, asystole, multi-organ failure) are never acceptable causes.`});
+  }
+
+  // missing expected lines
+  c.lines.forEach((L,j)=>{
+    possible+=0; // already counted via matches
+    if(expTaken[j]===-1){
+      issues.push({cls:'fb-err',t:`Missing from Part I: <i>${L.name}</i>. ${j===c.lines.length-1?'This is the <b>underlying cause</b> — without it the certificate stops mid-chain and fails to explain why the death occurred.':'The chain has a logical gap without it.'}`});
+    }
+  });
+  possible+=0;
+  // ensure possible reflects full expected chain even if user filled fewer lines
+  const minPossible=c.lines.length*2;
+  if(possible<minPossible)possible=minPossible;
+
+  if(orderBroken)issues.push({cls:'fb-warn',t:'Sequence order: reading bottom-to-top, each condition must cause the one above it. Reorder your lines.'});
+
+  // Part II
+  const p2=document.getElementById(`c${i}-part2`).value.trim();
+  const fbp2=document.getElementById(`c${i}-fbp2`);
+  possible+=2;
+  const p2Abbrevs=p2?findAbbrevs(p2):[];
+  if(p2Abbrevs.length)issues.push({cls:'fb-warn',t:`Abbreviation used in Part II (${p2Abbrevs.join(', ')}) — write terms out in full ("chronic obstructive pulmonary disease," not "COPD").`});
+  if(c.part2.expectSome){
+    if(p2 && c.part2.concepts.some(re=>re.test(p2))){earned+=2;setFB(fbp2,'fb-ok',`✓ Appropriate contributing conditions. Model: <i>${c.part2.name}</i>`);}
+    else if(p2){earned+=1;setFB(fbp2,'fb-warn',`Check Part II — the model answer lists: <i>${c.part2.name}</i>. Part II is for conditions that contributed but are not links in the Part I chain.`);}
+    else {setFB(fbp2,'fb-warn',`Part II should not be empty here — this patient had significant contributing conditions: <i>${c.part2.name}</i>.`);issues.push({cls:'fb-warn',t:`Part II left empty: contributing comorbidities (${c.part2.name}) were omitted.`});}
+  } else {
+    earned+=2;
+    if(p2)setFB(fbp2,'fb-info',`Reasonable — Part II is optional in this case. Model: <i>${c.part2.name}</i>. Make sure nothing here duplicates the Part I chain.`);
+    else setFB(fbp2,'fb-info',`Acceptable to leave blank in this case (model: <i>${c.part2.name}</i>).`);
+  }
+
+  // Tobacco
+  const tob=getRadio(`c${i}-tob`);
+  const fbtob=document.getElementById(`c${i}-fbtob`);
+  possible+=1;
+  if(!tob){setFB(fbtob,'fb-warn','Answer the tobacco question — it is a required field in eVital.');}
+  else if(c.tobacco.includes(tob)){earned+=1;setFB(fbtob,'fb-ok','✓ '+c.tobaccoNote);}
+  else {setFB(fbtob,'fb-warn',c.tobaccoNote);}
+
+  // Manner
+  const manner=getRadio(`c${i}-manner`);
+  const fbm=document.getElementById(`c${i}-fbmanner`);
+  possible+=2;
+  if(!manner){setFB(fbm,'fb-warn','Select a manner of death.');}
+  else if(manner===c.manner){earned+=2;setFB(fbm,'fb-ok',c.isOcmeCase?`✓ Correct — the manner here is <b>${c.manner}</b>, which is exactly why a hospital physician cannot certify this death.`:`✓ Correct — this is a natural death caused entirely by disease.`);}
+  else if(c.isOcmeCase&&manner==='Natural'){setFB(fbm,'fb-err','Certifying this as Natural would be a false certificate — the chain of events begins with an injury. See the feedback below.');issues.push({cls:'fb-err',t:'Manner marked Natural, but the fatal chain begins with a fall (an injury). The manner is Accident, and only the OCME may certify it.'});}
+  else {setFB(fbm,'fb-err',`The correct manner is <b>${c.manner}</b>. In NYC, hospital certifiers may only ever certify Natural deaths; any other manner requires the OCME.`);}
+
+  // OCME
+  const ocme=getRadio(`c${i}-ocme`);
+  const fbo=document.getElementById(`c${i}-fbocme`);
+  possible+=2;
+  if(!ocme){setFB(fbo,'fb-warn','Decide: does this case require OCME notification?');}
+  else if(ocme===c.ocme){earned+=2;setFB(fbo,'fb-ok',c.ocme==='Yes'?'✓ Correct — call the OCME (212-447-2030) before any certificate is filed, and document the case number and investigator.':'✓ Correct — this death is 100% the result of natural disease and is certifiable by the hospital physician.');}
+  else if(c.ocme==='Yes'){setFB(fbo,'fb-err','This death <b>must</b> be reported to the OCME. Any death not entirely due to natural disease — including delayed deaths from falls and other injuries, with no time limit — is reportable before certification.');issues.push({cls:'fb-err',t:'OCME referral missed — this is the critical error in this case. Injury-initiated deaths are reportable no matter how much time has passed.'});}
+  else {setFB(fbo,'fb-warn','OCME referral is not required here — the entire chain is natural disease. (Calling to ask is never wrong, but this case is certifiable by the treating physician.)');}
+
+  // score — a certificate with any major (red) error cannot score above 70%
+  let pct=Math.round(100*earned/possible);
+  if(issues.some(x=>x.cls==='fb-err'))pct=Math.min(pct,70);
+  const res=document.getElementById(`results-${i}`);res.classList.add('show');
+  const sn=document.getElementById(`score-${i}`);
+  sn.textContent=pct+'%';
+  sn.className='score-num '+(pct>=85?'score-good':pct>=60?'score-mid':'score-poor');
+  document.getElementById(`scoretext-${i}`).innerHTML=
+    pct>=85?'<b>Well certified.</b> Review any remaining notes below, then compare with the model answer.'
+    :pct>=60?'<b>Close — review the flagged items.</b> The inline notes on each field explain what to fix; then compare with the model answer.'
+    :'<b>Review needed.</b> Work through the flagged items and the quick-reference rules, then try the case again before revealing the model answer.';
+  const box=document.getElementById(`issues-${i}`);
+  box.innerHTML='<h3>Key findings on your certificate</h3>'+
+    (issues.length?issues.map(x=>`<div class="issue ${x.cls}">${x.t}</div>`).join(''):'<div class="issue fb-ok">No major errors identified. Compare your wording with the model answer for fine-tuning.</div>');
+  state.results[i]={pct,done:true};
+  const nb=document.getElementById('nav-'+i);
+  nb.classList.remove('done-good','done-bad');
+  nb.classList.add(pct>=85?'done-good':'done-bad');
+  saveCase(i);
+  res.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ================= MODEL ANSWER ================= */
+function revealModel(i){
+  const c=CASES[i];
+  const wrap=document.getElementById(`modelwrap-${i}`);
+  const letters=['a','b','c','d'];
+  wrap.classList.add('show');
+  wrap.innerHTML=`
+  <div class="model">
+    <h3>📄 Model certificate</h3>
+    <div class="model-cert">
+      <table>
+        <tr><td class="mrow-label" colspan="3">Part I — cause of death ${c.isOcmeCase?'(as the chain would be certified — by the OCME, not by you)':''}</td></tr>
+        ${c.lines.map((L,j)=>`<tr><td class="ltr">${letters[j]}.</td><td>${L.name}</td><td class="intv">${L.interval}</td></tr>`).join('')}
+        <tr><td class="mrow-label" colspan="3">Part II — other significant conditions</td></tr>
+        <tr><td></td><td colspan="2">${c.part2.name}</td></tr>
+        <tr><td class="mrow-label" colspan="3">Certification items</td></tr>
+        <tr><td></td><td colspan="2"><b>Manner:</b> ${c.manner}${c.isOcmeCase?' (OCME jurisdiction)':''} &nbsp;·&nbsp; <b>OCME report required:</b> ${c.ocme} &nbsp;·&nbsp; <b>Tobacco:</b> ${c.tobacco[0]}</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="teach">
+    <h3>🎓 Teaching points</h3>
+    <ul>${c.teaching.map(t=>`<li>${t}</li>`).join('')}</ul>
+  </div>`;
+  wrap.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ================= RESET / PERSIST (in-memory) ================= */
+const saved={};
+function saveCase(i){
+  const d={lines:[],ints:[],p2:document.getElementById(`c${i}-part2`).value,
+    tob:getRadio(`c${i}-tob`),manner:getRadio(`c${i}-manner`),ocme:getRadio(`c${i}-ocme`)};
+  for(let li=0;li<4;li++){d.lines.push(document.getElementById(`c${i}-line${li}`).value);d.ints.push(document.getElementById(`c${i}-int${li}`).value);}
+  saved[i]=d;
+}
+function restoreCase(i){
+  const d=saved[i];if(!d)return;
+  for(let li=0;li<4;li++){document.getElementById(`c${i}-line${li}`).value=d.lines[li];document.getElementById(`c${i}-int${li}`).value=d.ints[li];}
+  document.getElementById(`c${i}-part2`).value=d.p2;
+  ['tob','manner','ocme'].forEach(k=>{if(d[k]){const el=document.querySelector(`input[name="c${i}-${k}"][value="${d[k]}"]`);if(el)el.checked=true;}});
+  if(state.results[i]&&state.results[i].done)grade(i);
+}
+function resetCase(i){delete saved[i];delete state.results[i];const nb=document.getElementById('nav-'+i);nb.classList.remove('done-good','done-bad');showCase(i);}
+
+/* ================= SUMMARY ================= */
+function showSummary(){
+  container.innerHTML='';
+  document.querySelectorAll('.casenav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nav-sum').classList.add('active');
+  const sum=document.getElementById('summary');
+  sum.style.display='block';
+  const done=Object.keys(state.results).length;
+  const avg=done?Math.round(Object.values(state.results).reduce((a,r)=>a+r.pct,0)/done):0;
+  sum.innerHTML=`
+    <h2>Session summary</h2>
+    <p>${done} of ${CASES.length} cases attempted${done?` · average score <b>${avg}%</b>`:''}.</p>
+    <table>
+      <tr><th>Case</th><th>Topic</th><th>Score</th></tr>
+      ${CASES.map((c,i)=>{const r=state.results[i];return `<tr><td>${i+1}</td><td>${c.title.replace(/^Case \d+ — /,'')}</td><td>${r?`<b class="${r.pct>=85?'score-good':r.pct>=60?'score-mid':'score-poor'}">${r.pct}%</b>`:'—'}</td></tr>`;}).join('')}
+    </table>
+    <h3 style="margin-top:20px;color:var(--navy)">The six habits of a good certifier</h3>
+    <ol style="font-size:.92rem">
+      <li>Build the chain bottom-up: pick the <b>underlying cause</b> first, then trace forward to the immediate cause.</li>
+      <li>Never write a <b>mechanism</b> (cardiac arrest, asystole, multi-organ failure) or a treatment.</li>
+      <li><b>No abbreviations</b>, ever. Specify organism, site, laterality, and etiology when documented.</li>
+      <li>Give an <b>interval</b> for every line — "unknown" beats a blank.</li>
+      <li>Use <b>Part II</b> for contributors outside the chain (COPD, diabetes, CKD, dementia).</li>
+      <li>Screen every death with the <b>but-for test</b>: any injury, drug, procedure, or non-natural factor in the chain → call the <b>OCME at 212-447-2030</b> before certifying. No time limit applies.</li>
+    </ol>
+    <p style="font-size:.8rem;color:var(--gray)">Answers are stored only for this browser session — refreshing the page clears your work.</p>`;
+  sum.scrollIntoView({behavior:'smooth'});
+}
+
+buildNav();
+showCase(0);
+</script>
+</body>
+</html>
