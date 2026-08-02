@@ -243,7 +243,7 @@ const CASES = [
   norepinephrine and vasopressin. He becomes anuric and acidotic and dies on hospital day 5 with refractory shock.`,
   lines:[
     {name:'Septic shock', interval:'2 days', optional:true, concepts:[/septic shock/i, /refractory (septic )?shock/i]},
-    {name:'Sepsis due to Streptococcus pneumoniae bacteremia', interval:'4 days', concepts:[/sepsis/i, /septicemia/i, /bacteremia/i]},
+    {name:'Sepsis due to Streptococcus pneumoniae bacteremia', interval:'4 days', optional:true, concepts:[/sepsis/i, /septicemia/i, /bacteremia/i]},
     {name:'Community-acquired bacterial pneumonia (Streptococcus pneumoniae)', interval:'5 days', concepts:[/pneumonia/i]}
   ],
   part2:{name:'Chronic obstructive pulmonary disease; type 2 diabetes mellitus', concepts:[/chronic obstructive|copd|emphysema/i, /diabetes/i], expectSome:true},
