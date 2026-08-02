@@ -287,7 +287,7 @@ const CASES = [
   lines:[
     {name:'Cerebral edema with transtentorial herniation', interval:'1 day', optional:true, concepts:[/cerebral (o?edema|herniation)/i, /herniation/i, /midline shift/i, /malignant.*edema/i]},
     {name:'Acute ischemic stroke, left middle cerebral artery territory', interval:'4 days', concepts:[/ischemi.*(stroke|infarct)|(stroke|infarct).*ischemi/i, /cerebral infarct/i, /middle cerebral artery/i, /\bstroke\b/i]},
-    {name:'Nonvalvular atrial fibrillation (cardioembolism)', interval:'Years', concepts:[/atrial fibrillation/i, /cardioembol/i]}
+    {name:'Nonvalvular atrial fibrillation (cardioembolism)', interval:'Years', concepts:[/atrial fib/i, /\bafib\b/i, /a[-\s]?fib/i, /cardioembol/i]}
   ],
   part2:{name:'Hypertension; prior gastrointestinal hemorrhage precluding anticoagulation', concepts:[/hypertension/i, /gastrointestinal|gi bleed/i], expectSome:true},
   manner:'Natural', ocme:'No', tobacco:['No','Unknown'],
@@ -564,8 +564,8 @@ function grade(i){
       else {msgs.push(`✓ Matches the expected condition: <i>${c.lines[j].name}</i>`);earned+=2;}
       lastExp=Math.max(lastExp,j);
     } else {
-      cls='fb-warn';earned+=1;
-      msgs.push(`The auto-grader couldn't verify this entry against the expected chain — that may be a wording difference rather than an error. Compare it with the model answer: if it represents the same condition (or another documented, etiologically sound link), count it as correct.`);
+      cls='fb-info';earned+=2;
+      msgs.push(`The auto-grader couldn't automatically match this entry, so it has been given full credit — this is usually just a wording difference. Please compare it with the model answer and confirm it represents a documented, etiologically sound condition.`);
     }
     if(abbrevs.length){if(cls==='fb-ok')cls='fb-warn';msgs.push(`Avoid abbreviations (<b>${abbrevs.join(', ')}</b>) — write every term out in full.`);issues.push({cls:'fb-warn',t:`Abbreviation used on line ${'abcd'[li]} (${abbrevs.join(', ')}) — death certificates must contain no abbreviations.`});}
     if(userInts[li]===''){msgs.push(`Add an approximate interval ("hours," "5 days," "years" — "unknown" is acceptable, blank is not).`);if(cls==='fb-ok')cls='fb-warn';}
@@ -573,11 +573,17 @@ function grade(i){
     if(mech)issues.push({cls:'fb-err',t:`Line ${'abcd'[li]}: "${mech}" — mechanisms of dying (arrest, asystole, multi-organ failure) are never acceptable causes.`});
   }
 
-  // missing expected lines (optional links are never penalized)
+  // missing expected lines. An unrecognized (unverified) filled line may BE a
+  // condition the grader failed to match, so it can "cover" a missing expected
+  // concept — we only hard-error when no unverified line is left to account for it.
+  let unverifiedSlots=filled.filter(o=>userMatch[o.idx]===null).length;
   c.lines.forEach((L,j)=>{
     if(expTaken[j]===-1){
       if(L.optional){
         issues.push({cls:'fb-info',t:`Optional link not included: <i>${L.name}</i> — the chain is acceptable with or without it.`});
+      } else if(unverifiedSlots>0){
+        unverifiedSlots--; // one of the resident's unrecognized entries may be this condition
+        issues.push({cls:'fb-info',t:`Confirm against the model answer: one of your entries the grader couldn't auto-match should represent <i>${L.name}</i> (or an equivalent, etiologically sound condition).`});
       } else {
         issues.push({cls:'fb-err',t:`Missing from Part I: <i>${L.name}</i>. ${j===c.lines.length-1?'This is the <b>underlying cause</b> — without it the certificate stops mid-chain and fails to explain why the death occurred.':'The chain has a logical gap without it.'}`});
       }
@@ -597,7 +603,7 @@ function grade(i){
   if(p2Abbrevs.length)issues.push({cls:'fb-warn',t:`Abbreviation used in Part II (${p2Abbrevs.join(', ')}) — write terms out in full ("chronic obstructive pulmonary disease," not "COPD").`});
   if(c.part2.expectSome){
     if(p2 && c.part2.concepts.some(re=>re.test(p2))){earned+=2;setFB(fbp2,'fb-ok',`✓ Appropriate contributing conditions. Model: <i>${c.part2.name}</i>`);}
-    else if(p2){earned+=1;setFB(fbp2,'fb-warn',`Check Part II — the model answer lists: <i>${c.part2.name}</i>. Part II is for conditions that contributed but are not links in the Part I chain.`);}
+    else if(p2){earned+=2;setFB(fbp2,'fb-info',`Given full credit — the grader couldn't auto-match your Part II wording. Compare with the model answer: <i>${c.part2.name}</i>. Part II is for conditions that contributed but are not links in the Part I chain.`);}
     else {setFB(fbp2,'fb-warn',`Part II should not be empty here — this patient had significant contributing conditions: <i>${c.part2.name}</i>.`);issues.push({cls:'fb-warn',t:`Part II left empty: contributing comorbidities (${c.part2.name}) were omitted.`});}
   } else {
     earned+=2;
