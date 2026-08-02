@@ -242,7 +242,7 @@ const CASES = [
   <i>Streptococcus pneumoniae</i>. Despite antibiotics he develops worsening hypotension, is intubated, and requires
   norepinephrine and vasopressin. He becomes anuric and acidotic and dies on hospital day 5 with refractory shock.`,
   lines:[
-    {name:'Septic shock', interval:'2 days', concepts:[/septic shock/i, /refractory (septic )?shock/i]},
+    {name:'Septic shock', interval:'2 days', optional:true, concepts:[/septic shock/i, /refractory (septic )?shock/i]},
     {name:'Sepsis due to Streptococcus pneumoniae bacteremia', interval:'4 days', concepts:[/sepsis/i, /septicemia/i, /bacteremia/i]},
     {name:'Community-acquired bacterial pneumonia (Streptococcus pneumoniae)', interval:'5 days', concepts:[/pneumonia/i]}
   ],
@@ -264,8 +264,8 @@ const CASES = [
   thrombosis. Despite systemic thrombolysis she deteriorates and dies two hours after arrival.`,
   lines:[
     {name:'Massive (saddle) pulmonary thromboembolism', interval:'Hours', concepts:[/pulmonary (thrombo)?embol/i, /saddle embol/i]},
-    {name:'Deep vein thrombosis, right lower extremity', interval:'Days to weeks', concepts:[/deep ven|deep-vein|venous thromb/i, /femoral (vein )?thromb/i]},
-    {name:'Metastatic colon adenocarcinoma', interval:'2 years', concepts:[/colon|colorectal/i, /adenocarcinoma.*colon/i]}
+    {name:'Deep vein thrombosis, right lower extremity', interval:'Days to weeks', optional:true, concepts:[/deep ven|deep-vein|venous thromb/i, /femoral (vein )?thromb/i, /\bdvt\b/i, /venous thromboembol/i, /hypercoagul/i, /thrombophilia/i]},
+    {name:'Metastatic colon adenocarcinoma', interval:'2 years', concepts:[/colon|colorectal/i, /adenocarcinoma/i, /metastatic.*(cancer|carcinoma|malignancy)/i]}
   ],
   part2:{name:'— (none required)', concepts:[], expectSome:false},
   manner:'Natural', ocme:'No', tobacco:['No','Unknown'],
@@ -285,7 +285,7 @@ const CASES = [
   edema and midline shift. In accordance with his goals of care, he transitions to comfort measures and dies on
   hospital day 4.`,
   lines:[
-    {name:'Cerebral edema with transtentorial herniation', interval:'1 day', concepts:[/cerebral (o?edema|herniation)/i, /herniation/i, /midline shift/i, /malignant.*edema/i]},
+    {name:'Cerebral edema with transtentorial herniation', interval:'1 day', optional:true, concepts:[/cerebral (o?edema|herniation)/i, /herniation/i, /midline shift/i, /malignant.*edema/i]},
     {name:'Acute ischemic stroke, left middle cerebral artery territory', interval:'4 days', concepts:[/ischemi.*(stroke|infarct)|(stroke|infarct).*ischemi/i, /cerebral infarct/i, /middle cerebral artery/i, /\bstroke\b/i]},
     {name:'Nonvalvular atrial fibrillation (cardioembolism)', interval:'Years', concepts:[/atrial fibrillation/i, /cardioembol/i]}
   ],
@@ -308,9 +308,9 @@ const CASES = [
   25 years.`,
   lines:[
     {name:'Upper gastrointestinal hemorrhage (bleeding esophageal varices)', interval:'Hours', concepts:[/variceal|varices/i, /(upper )?gastrointestinal (hemorrhage|bleed)/i, /hematemesis/i, /hypovolemic shock|hemorrhagic shock/i]},
-    {name:'Portal hypertension', interval:'Years', concepts:[/portal hypertension/i]},
+    {name:'Portal hypertension', interval:'Years', optional:true, concepts:[/portal hypertension/i]},
     {name:'Alcohol-associated cirrhosis of the liver', interval:'Years', concepts:[/cirrhosis/i]},
-    {name:'Chronic alcohol use disorder', interval:'25 years', concepts:[/alcohol/i, /ethanol/i]}
+    {name:'Chronic alcohol use disorder', interval:'25 years', optional:true, concepts:[/alcohol/i, /ethanol/i]}
   ],
   part2:{name:'Hepatic encephalopathy', concepts:[/encephalopathy/i, /coagulopathy/i], expectSome:false},
   manner:'Natural', ocme:'No', tobacco:['No','Unknown'],
@@ -330,7 +330,7 @@ const CASES = [
   transitioned to inotrope-dependent comfort-focused care. She dies on hospital day 9.`,
   lines:[
     {name:'Acute on chronic congestive heart failure', interval:'2 weeks', concepts:[/heart failure/i, /cardiogenic shock/i, /decompensat/i]},
-    {name:'Ischemic cardiomyopathy', interval:'7 years', concepts:[/ischemic cardiomyopathy/i, /cardiomyopathy/i]},
+    {name:'Ischemic cardiomyopathy', interval:'7 years', optional:true, concepts:[/ischemic cardiomyopathy/i, /cardiomyopathy/i]},
     {name:'Atherosclerotic coronary artery disease', interval:'Greater than 10 years', concepts:[/coronary artery disease|atherosclero/i, /myocardial infarction/i]}
   ],
   part2:{name:'Stage 4 chronic kidney disease', concepts:[/chronic kidney|renal (disease|insufficiency)/i, /cardiorenal/i], expectSome:true},
@@ -353,7 +353,7 @@ const CASES = [
   isOcmeCase:true,
   lines:[
     {name:'Hypostatic pneumonia', interval:'Days', concepts:[/pneumonia/i]},
-    {name:'Immobility following repair of right femoral neck fracture', interval:'3 weeks', concepts:[/immobil|bedbound|deconditioning/i, /hemiarthroplasty|surgical repair/i, /fracture/i]},
+    {name:'Immobility following repair of right femoral neck fracture', interval:'3 weeks', optional:true, concepts:[/immobil|bedbound|deconditioning/i, /hemiarthroplasty|surgical repair/i, /fracture/i]},
     {name:'Fall (tripped on rug at home)', interval:'3 weeks', concepts:[/fall|fell|tripped/i]}
   ],
   part2:{name:'Osteoporosis; dementia', concepts:[/osteoporosis/i, /dementia/i], expectSome:false},
@@ -375,7 +375,7 @@ const CASES = [
   MOLST, and he dies on hospital day 4.`,
   lines:[
     {name:'Aspiration pneumonia', interval:'4 days', concepts:[/aspiration pneumoni/i, /pneumonia/i]},
-    {name:'Oropharyngeal dysphagia', interval:'1 year', concepts:[/dysphagia/i, /swallow/i, /aspiration(?! pneumoni)/i]},
+    {name:'Oropharyngeal dysphagia', interval:'1 year', optional:true, concepts:[/dysphagia/i, /swallow/i, /aspiration(?! pneumoni)/i]},
     {name:'Advanced Alzheimer’s disease dementia', interval:'8 years', concepts:[/alzheimer/i, /dementia/i]}
   ],
   part2:{name:'Protein-calorie malnutrition', concepts:[/malnutrition/i, /protein.calorie/i, /deconditioning/i], expectSome:false},
@@ -564,7 +564,8 @@ function grade(i){
       else {msgs.push(`✓ Matches the expected condition: <i>${c.lines[j].name}</i>`);earned+=2;}
       lastExp=Math.max(lastExp,j);
     } else {
-      cls='fb-warn';msgs.push(`This entry doesn't match a condition expected in this chain. Re-read the vignette — what documented disease does this line represent, and does the line below it explain it?`);
+      cls='fb-warn';earned+=1;
+      msgs.push(`The auto-grader couldn't verify this entry against the expected chain — that may be a wording difference rather than an error. Compare it with the model answer: if it represents the same condition (or another documented, etiologically sound link), count it as correct.`);
     }
     if(abbrevs.length){if(cls==='fb-ok')cls='fb-warn';msgs.push(`Avoid abbreviations (<b>${abbrevs.join(', ')}</b>) — write every term out in full.`);issues.push({cls:'fb-warn',t:`Abbreviation used on line ${'abcd'[li]} (${abbrevs.join(', ')}) — death certificates must contain no abbreviations.`});}
     if(userInts[li]===''){msgs.push(`Add an approximate interval ("hours," "5 days," "years" — "unknown" is acceptable, blank is not).`);if(cls==='fb-ok')cls='fb-warn';}
@@ -572,16 +573,18 @@ function grade(i){
     if(mech)issues.push({cls:'fb-err',t:`Line ${'abcd'[li]}: "${mech}" — mechanisms of dying (arrest, asystole, multi-organ failure) are never acceptable causes.`});
   }
 
-  // missing expected lines
+  // missing expected lines (optional links are never penalized)
   c.lines.forEach((L,j)=>{
-    possible+=0; // already counted via matches
     if(expTaken[j]===-1){
-      issues.push({cls:'fb-err',t:`Missing from Part I: <i>${L.name}</i>. ${j===c.lines.length-1?'This is the <b>underlying cause</b> — without it the certificate stops mid-chain and fails to explain why the death occurred.':'The chain has a logical gap without it.'}`});
+      if(L.optional){
+        issues.push({cls:'fb-info',t:`Optional link not included: <i>${L.name}</i> — the chain is acceptable with or without it.`});
+      } else {
+        issues.push({cls:'fb-err',t:`Missing from Part I: <i>${L.name}</i>. ${j===c.lines.length-1?'This is the <b>underlying cause</b> — without it the certificate stops mid-chain and fails to explain why the death occurred.':'The chain has a logical gap without it.'}`});
+      }
     }
   });
-  possible+=0;
-  // ensure possible reflects full expected chain even if user filled fewer lines
-  const minPossible=c.lines.length*2;
+  // ensure possible reflects at least the required chain even if fewer lines were filled
+  const minPossible=c.lines.filter(L=>!L.optional).length*2;
   if(possible<minPossible)possible=minPossible;
 
   if(orderBroken)issues.push({cls:'fb-warn',t:'Sequence order: reading bottom-to-top, each condition must cause the one above it. Reorder your lines.'});
@@ -663,7 +666,7 @@ function revealModel(i){
     <div class="model-cert">
       <table>
         <tr><td class="mrow-label" colspan="3">Part I — cause of death ${c.isOcmeCase?'(as the chain would be certified — by the OCME, not by you)':''}</td></tr>
-        ${c.lines.map((L,j)=>`<tr><td class="ltr">${letters[j]}.</td><td>${L.name}</td><td class="intv">${L.interval}</td></tr>`).join('')}
+        ${c.lines.map((L,j)=>`<tr><td class="ltr">${letters[j]}.</td><td>${L.name}${L.optional?' <span style="font-size:.75rem;color:#888;font-style:italic">(optional link — chain acceptable without it)</span>':''}</td><td class="intv">${L.interval}</td></tr>`).join('')}
         <tr><td class="mrow-label" colspan="3">Part II — other significant conditions</td></tr>
         <tr><td></td><td colspan="2">${c.part2.name}</td></tr>
         <tr><td class="mrow-label" colspan="3">Certification items</td></tr>
