@@ -118,6 +118,27 @@
   #summary table{width:100%;border-collapse:collapse;font-size:.9rem;}
   #summary th,#summary td{text-align:left;padding:8px 10px;border-bottom:1px solid #e4e8ef;}
   footer{max-width:960px;margin:0 auto;padding:0 14px 40px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:.75rem;color:var(--gray);}
+
+  /* start card / name gate */
+  #startcard{background:#fff;border:1px solid #d8dce5;border-radius:10px;padding:26px 30px;margin-top:16px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;max-width:640px;margin-left:auto;margin-right:auto;}
+  #startcard h2{margin:0 0 6px;color:var(--navy);font-size:1.15rem;}
+  #startcard p{font-size:.9rem;color:#444;margin:6px 0 16px;}
+  #startcard label{display:block;font-size:.8rem;font-weight:600;color:#333;margin:12px 0 4px;}
+  #startcard input[type=text], #startcard select{width:100%;padding:10px 12px;border:1.5px solid #c6ccd8;border-radius:8px;font-size:.95rem;font-family:inherit;}
+  #startcard input[type=text]:focus{outline:none;border-color:var(--teal);}
+  #start-warn{display:none;color:var(--err);background:var(--err-bg);border:1px solid #efc0c6;border-radius:6px;padding:8px 12px;font-size:.85rem;margin-top:10px;}
+  .pass-badge{display:inline-block;padding:8px 18px;border-radius:24px;font-weight:700;font-size:1rem;letter-spacing:.02em;}
+  .pass-yes{background:var(--ok-bg);color:var(--ok);border:2px solid var(--ok);}
+  .pass-no{background:var(--warn-bg);color:var(--warn);border:2px solid var(--warn);}
+  .cert-line{font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:.72rem;color:#555;border-bottom:1px solid var(--ink);padding:6px 14px;background:#f4f1e6;}
+
+  /* print: only the summary, formatted as a compliance record */
+  @media print{
+    header, .casenav, details.ref, footer, #case-container, .no-print{display:none !important;}
+    body{background:#fff;}
+    #summary{display:block !important;border:none;box-shadow:none;padding:0;}
+    main{padding:0;}
+  }
   @media (max-width:640px){ .cod-grid{grid-template-columns:20px 1fr;} .cod-grid .intv-in{grid-column:2/3;} .cod-grid .hdr-int{display:none;} }
 </style>
 </head>
@@ -171,7 +192,24 @@
   </div>
 </details>
 
-<div class="casenav sans" id="casenav"></div>
+<div id="startcard">
+  <h2>Before you begin</h2>
+  <p>Enter your name as you would like it to appear on your completion summary. When you finish, the
+  Summary page shows your scores and can be emailed to document completion of this module.
+  <b>Passing requires an average score of 80% or higher across all 7 cases</b> — your best score on each
+  case counts, and you may repeat cases as many times as you like.</p>
+  <label for="trainee-name">Full name (required)</label>
+  <input type="text" id="trainee-name" autocomplete="name" placeholder="e.g., Maria Alvarez, MD">
+  <label for="trainee-pgy">Training level (optional)</label>
+  <select id="trainee-pgy">
+    <option value="">— Select —</option>
+    <option>PGY-1</option><option>PGY-2</option><option>PGY-3</option>
+    <option>PGY-4+</option><option>Fellow</option><option>Attending</option><option>Other</option>
+  </select>
+  <div id="start-warn">Please enter your name before starting.</div>
+  <div style="margin-top:18px"><button class="btn btn-primary" onclick="beginModule()">Begin the module →</button></div>
+</div>
+<div class="casenav sans" id="casenav" style="display:none"></div>
 <div id="case-container"></div>
 <div id="summary"></div>
 </main>
@@ -353,7 +391,19 @@ const CASES = [
 ];
 
 /* ================= STATE ================= */
-const state = { current:0, results:{} };
+const state = { current:0, results:{}, trainee:{name:'', pgy:''}, started:null };
+const PASS_THRESHOLD = 80;
+
+function beginModule(){
+  const name=document.getElementById('trainee-name').value.trim();
+  if(!name){document.getElementById('start-warn').style.display='block';return;}
+  state.trainee.name=name;
+  state.trainee.pgy=document.getElementById('trainee-pgy').value;
+  state.started=new Date();
+  document.getElementById('startcard').style.display='none';
+  document.getElementById('casenav').style.display='flex';
+  showCase(0);
+}
 
 /* ================= RENDER ================= */
 const nav = document.getElementById('casenav');
@@ -400,6 +450,7 @@ function showCase(i){
         <div class="l1">CERTIFICATE OF DEATH — CONFIDENTIAL MEDICAL REPORT</div>
         <div class="l2">City of New York · Department of Health and Mental Hygiene · Bureau of Vital Statistics (training facsimile)</div>
       </div>
+      <div class="cert-line">CERTIFIER (TRAINEE): <b>${state.trainee.name||'—'}</b>${state.trainee.pgy?' · '+state.trainee.pgy:''}</div>
 
       <div class="cert-sec">
         <div class="cert-label sans">PART I. <span class="sub">Enter the chain of events — diseases, injuries, or complications — that directly caused the death. Enter the immediate cause on line a. Do NOT enter mechanisms such as cardiac arrest, respiratory arrest, or ventricular fibrillation. Do NOT abbreviate. One cause per line; not every line need be used.</span></div>
@@ -591,10 +642,11 @@ function grade(i){
   const box=document.getElementById(`issues-${i}`);
   box.innerHTML='<h3>Key findings on your certificate</h3>'+
     (issues.length?issues.map(x=>`<div class="issue ${x.cls}">${x.t}</div>`).join(''):'<div class="issue fb-ok">No major errors identified. Compare your wording with the model answer for fine-tuning.</div>');
-  state.results[i]={pct,done:true};
+  const best=Math.max(pct, state.results[i]?state.results[i].pct:0);
+  state.results[i]={pct:best,last:pct,done:true};
   const nb=document.getElementById('nav-'+i);
   nb.classList.remove('done-good','done-bad');
-  nb.classList.add(pct>=85?'done-good':'done-bad');
+  nb.classList.add(best>=PASS_THRESHOLD?'done-good':'done-bad');
   saveCase(i);
   res.scrollIntoView({behavior:'smooth',block:'start'});
 }
@@ -644,21 +696,60 @@ function restoreCase(i){
 function resetCase(i){delete saved[i];delete state.results[i];const nb=document.getElementById('nav-'+i);nb.classList.remove('done-good','done-bad');showCase(i);}
 
 /* ================= SUMMARY ================= */
+function fmtDate(d){return d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}
+function summaryStats(){
+  const done=Object.keys(state.results).length;
+  const avg=done===CASES.length?Math.round(Object.values(state.results).reduce((a,r)=>a+r.pct,0)/CASES.length):null;
+  const passed=avg!==null&&avg>=PASS_THRESHOLD;
+  return {done,avg,passed};
+}
+function emailResults(){
+  const {done,avg,passed}=summaryStats();
+  const now=new Date();
+  const lines=[
+    'Death Certificate Training Module (NYC) — Completion Summary','',
+    'Name: '+state.trainee.name+(state.trainee.pgy?' ('+state.trainee.pgy+')':''),
+    'Date: '+fmtDate(now),
+    'Cases completed: '+done+' of '+CASES.length,
+    (avg!==null?'Overall score (best per case): '+avg+'%':'Overall score: incomplete'),
+    'Result: '+(passed?'PASSED (threshold '+PASS_THRESHOLD+'%)':'NOT YET PASSED (threshold '+PASS_THRESHOLD+'%)'),'',
+    'Case scores:',
+    ...CASES.map((c,i)=>{const r=state.results[i];return '  Case '+(i+1)+' — '+c.title.replace(/^Case \d+ — /,'')+': '+(r?r.pct+'%':'not attempted');}),'',
+    'Scores are self-reported from the interactive module at:',
+    'https://dimitrov-v.github.io/death-certificate-trainer/'
+  ];
+  const mail='mailto:cmrmedicine@nychhc.org?subject='+encodeURIComponent('Death Certificate Training — Completion: '+state.trainee.name)+'&body='+encodeURIComponent(lines.join('\n'));
+  window.location.href=mail;
+}
 function showSummary(){
   container.innerHTML='';
   document.querySelectorAll('.casenav button').forEach(b=>b.classList.remove('active'));
   document.getElementById('nav-sum').classList.add('active');
   const sum=document.getElementById('summary');
   sum.style.display='block';
-  const done=Object.keys(state.results).length;
-  const avg=done?Math.round(Object.values(state.results).reduce((a,r)=>a+r.pct,0)/done):0;
+  const {done,avg,passed}=summaryStats();
+  const now=new Date();
   sum.innerHTML=`
-    <h2>Session summary</h2>
-    <p>${done} of ${CASES.length} cases attempted${done?` · average score <b>${avg}%</b>`:''}.</p>
+    <h2 style="margin-bottom:2px">Completion summary — Death Certificate Training Module (NYC)</h2>
+    <p style="margin-top:4px">
+      <b>${state.trainee.name||'(name not entered)'}</b>${state.trainee.pgy?' · '+state.trainee.pgy:''}
+      &nbsp;·&nbsp; ${fmtDate(now)}
+    </p>
+    <p>
+      ${avg!==null
+        ?`<span class="pass-badge ${passed?'pass-yes':'pass-no'}">${passed?'✓ PASSED':'NOT YET PASSED'} — ${avg}% average (threshold ${PASS_THRESHOLD}%)</span>`
+        :`<span class="pass-badge pass-no">INCOMPLETE — ${done} of ${CASES.length} cases attempted</span>`}
+    </p>
+    ${avg!==null&&!passed?`<p style="font-size:.87rem;color:var(--warn)">You may repeat any case (use its <i>Reset</i> button) — your best score on each case is the one that counts.</p>`:''}
     <table>
-      <tr><th>Case</th><th>Topic</th><th>Score</th></tr>
-      ${CASES.map((c,i)=>{const r=state.results[i];return `<tr><td>${i+1}</td><td>${c.title.replace(/^Case \d+ — /,'')}</td><td>${r?`<b class="${r.pct>=85?'score-good':r.pct>=60?'score-mid':'score-poor'}">${r.pct}%</b>`:'—'}</td></tr>`;}).join('')}
+      <tr><th>Case</th><th>Topic</th><th>Best score</th></tr>
+      ${CASES.map((c,i)=>{const r=state.results[i];return `<tr><td>${i+1}</td><td>${c.title.replace(/^Case \d+ — /,'')}</td><td>${r?`<b class="${r.pct>=PASS_THRESHOLD?'score-good':r.pct>=60?'score-mid':'score-poor'}">${r.pct}%</b>`:'—'}</td></tr>`;}).join('')}
     </table>
+    <div class="no-print" style="margin-top:18px;display:flex;gap:12px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="emailResults()">✉ Email my results</button>
+      <button class="btn btn-secondary" onclick="window.print()">🖨 Print / save as PDF</button>
+    </div>
+    <p class="no-print" style="font-size:.78rem;color:var(--gray);margin-top:8px">"Email my results" opens your mail app with a pre-filled summary addressed to the chief residents (cmrmedicine@nychhc.org) — you can edit the recipient before sending. Or print/save this page as a PDF and attach it.</p>
     <h3 style="margin-top:20px;color:var(--navy)">The six habits of a good certifier</h3>
     <ol style="font-size:.92rem">
       <li>Build the chain bottom-up: pick the <b>underlying cause</b> first, then trace forward to the immediate cause.</li>
@@ -673,7 +764,7 @@ function showSummary(){
 }
 
 buildNav();
-showCase(0);
+// Cases are revealed by beginModule() once the trainee enters their name.
 </script>
 </body>
 </html>
